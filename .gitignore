@@ -1,0 +1,30 @@
+# Models and checkpoints (too large for git)
+models/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+# Local development files
+server.py
+run.sh
+voicefilter-repo/
+SoloSpeech/
+demo/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
