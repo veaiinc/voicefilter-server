@@ -122,6 +122,6 @@ def filter_with_reference():
 init_client()
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5001))
+    port = int(os.environ.get('PORT', 7860))
     print(f"Starting VoiceFilter Cloud Server on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
