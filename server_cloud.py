@@ -1,15 +1,11 @@
 """
 VoiceFilter Cloud Server - Lightweight Flask API for speaker voice isolation
-
-This server uses HuggingFace API for voice extraction (no local models needed).
-Designed for cloud deployment (Railway, Render, etc.)
+Uses HuggingFace API only (no local models needed).
 """
 
 import os
 import tempfile
-import numpy as np
-import soundfile as sf
-import librosa
+import shutil
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import io
@@ -66,11 +62,6 @@ def health():
 def filter_with_reference():
     """
     Extract target speaker using reference audio via HuggingFace API
-
-    Input:
-        - noisy: WAV file with mixed audio
-        - reference: WAV file of target speaker
-    Output: WAV file with extracted target speaker audio
     """
     if hf_tse_client is None:
         return jsonify({'error': 'HuggingFace API not available'}), 500
@@ -106,22 +97,17 @@ def filter_with_reference():
         extracted_path = result[1]
         print(f"Extraction complete: {extracted_path}")
 
-        # Read and resample to 16kHz
-        enhanced_wav, sr = sf.read(extracted_path)
-        if sr != 16000:
-            enhanced_wav = librosa.resample(enhanced_wav, orig_sr=sr, target_sr=16000)
+        # Read the result file
+        with open(extracted_path, 'rb') as f:
+            audio_data = f.read()
 
-        # Cleanup
+        # Cleanup temp files
         os.unlink(noisy_path)
         os.unlink(ref_path)
 
-        # Return as WAV
-        output_buffer = io.BytesIO()
-        sf.write(output_buffer, enhanced_wav, 16000, format='WAV')
-        output_buffer.seek(0)
-
+        # Return the audio file
         return send_file(
-            output_buffer,
+            io.BytesIO(audio_data),
             mimetype='audio/wav',
             as_attachment=True,
             download_name='enhanced.wav'
